@@ -1,0 +1,15 @@
+/* MarkerStyles.css */
+.leaflet-marker-icon {
+    border: 2px solid #3388ff; /* blue border */
+    border-radius: 50%; /* circular icons */
+    background-color: rgba(255, 255, 255, 0.5); /* semi-transparent white background */
+  }
+  
+  .leaflet-marker-shadow {
+    display: none; /* hide the default shadow */
+  }
+  
+  .leaflet-popup {
+    font-size: 0.8em; /* smaller font size for popups */
+  }
+  
