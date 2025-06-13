@@ -1,0 +1,87 @@
+# List of Services
+services:
+  spring:
+    build: ./spring   # Look for Dockerfile in this path
+    ports:
+      - "8080:8080"   # Expose port 8080
+    environment:
+      # These are used in apllication.property to setup DB connection
+      - DB_ADDRESS=jdbc:mysql://mysql:3306
+      - DB_DATABASE=jobs_db
+      - DB_USER=root
+      - DB_PASSWORD=pwd
+    networks:
+      - spring-mysql    # Allow the spring app to discover the mysql app
+      - spring-react    # Allow the spring app to talk to the react app
+
+  mysql:
+    build: ./mysql    # Look for Dockerfile in this path
+    ports:
+      - "3306:3306"
+    environment:
+      # Mysql docker image env vars
+      - MYSQL_ROOT_PASSWORD=pwd
+      - MYSQL_DATABASE=jobs_db
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - spring-mysql    # Allow the mysql app to talk to the spring app
+    healthcheck:
+            test: ["CMD", "mariadb" ,"-u", "root", "--password=pwd", "jobs_db"]
+            timeout: 20s
+            retries: 10
+    
+  react:
+    build: ./react    # Look for Dockerfile in this path
+    ports:
+      - "3000:3000"   # Expose port 3000
+    environment:
+      # Tell the react app that our spring server is running here
+      - BACKEND_PROXY=http://spring:8080
+    volumes:
+      - type: bind
+        source: ./react/src
+        target: /src
+
+    networks:
+      - spring-react    # Allow the react app to discover the spring app
+
+  seleniumstandalone:
+    image: selenium/standalone-chrome
+    ports:
+      - "4444:4444"  
+    environment:
+      - BACKEND_PROXY=http://spring:8080
+    # volumes:
+    #   - type: bind
+    #     source: ./react/src
+        # target: /src
+    networks:
+      - spring-mysql
+      
+  scraper-job:
+    # image: fcabrera01/scraper
+    build: ./scraper
+    environment:
+      - BACKEND_PROXY=http://spring:8080
+    restart: no
+    depends_on:
+         mysql:
+            condition: service_healthy
+    # profiles:
+    # - scraper-job
+    # volumes:
+    #   - type: bind
+    #     source: ./react/src
+        # target: /src
+    networks:
+      - spring-mysql
+
+
+volumes:
+  mariadb_data:
+
+# List of Networks
+networks:               
+  spring-mysql:
+  spring-react:
