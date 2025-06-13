@@ -1,4 +1,4 @@
-# CIS*3760 Project Template
+# GeoJobSearch
 
 This project will serve as a guide on how to setup a three part application that includes a Spring server, a SQL database and a React frontend both locally and on a Kubernetes host.
 
